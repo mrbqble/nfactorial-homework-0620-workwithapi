@@ -22,7 +22,17 @@ function App() {
   const [itemToAdd, setItemToAdd] = useState("");
   const [items, setItems] = useState([]);
   const [completedItems, setCompletedItems] = useState([]);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchedItem, setSearchedItem] = useState("");
+
+  const searchArray = items.filter(item =>
+    item.content.substring(0, searchedItem.length).toLowerCase() === searchedItem.toLowerCase())
+
+  const arraySF = !searchedItem ? items : searchArray;
+
+  const searchCompletedArray = completedItems.filter(item =>
+    item.content.substring(0, searchedItem.length).toLowerCase() === searchedItem.toLowerCase())
+
+  const arrayCSF = !searchedItem ? completedItems : searchCompletedArray;
 
   const handleChangeItem = (event) => {
     setItemToAdd(event.target.value);
@@ -63,6 +73,24 @@ function App() {
     getCompletedItems();
     // setItems([...items.filter(item => item.id !== id)]);
   })
+  };
+
+  const handleItemImportant = ({id}) => {
+    setItems((prevItems) => prevItems.map((item) => {
+      if (item.id === id) {
+        return { ...item, important: !item.important };
+      }
+      else return item;
+    }));
+  };
+
+  const handleCompletedItemImportant = ({id}) => {
+    setCompletedItems((prevItems) => prevItems.map((item) => {
+      if (item.id === id) {
+        return { ...item, important: !item.important };
+      }
+      else return item;
+    }));
   };
 
   const toggleItemReopen = ({task_id}) => {
@@ -106,7 +134,6 @@ function App() {
   useEffect(() => {
     getCompletedItems();
     getActiveItems();
-   
   }, [])
 
   return (
@@ -122,17 +149,17 @@ function App() {
           type="text"
           className="form-control search-input"
           placeholder="type to search"
-          value={searchValue}
-          onChange={(event) => setSearchValue(event.target.value)}
+          value={searchedItem}
+          onChange={(event) => setSearchedItem(event.target.value)}
         />
       </div>
 
       {/* List-group */}
       <ul className="list-group todo-list">
-        {items.length > 0 ? (
-          items.map((item) => (
+        {arraySF.length > 0 ? (
+          arraySF.map((item) => (
             <li key={item.id} className="list-group-item">
-              <span className={`todo-list-item${item.done ? " done" : ""}`}>
+              <span className={`todo-list-item${item.done ? " done" : ""} ${item.important ? " important" : ""}`}>
                 <span
                   className="todo-list-item-label"
                 >
@@ -142,6 +169,7 @@ function App() {
                 <button
                   type="button"
                   className="btn btn-outline-success btn-sm float-right"
+                  onClick={() => handleItemImportant(item) }
                 >
                   <i className="fa fa-exclamation" />
                 </button>
@@ -176,10 +204,10 @@ function App() {
       </div>
 
       <ul className="list-group todo-list">
-        {completedItems.length > 0 ? (
-          completedItems.map((item) => (
+        {arrayCSF.length > 0 ? (
+          arrayCSF.map((item) => (
             <li key={item.id} className="list-group-item">
-              <span className={`todo-list-item done`}>
+              <span className={`todo-list-item done ${item.important ? " important" : ""}`}>
                 <span
                   className="todo-list-item-label"
                 >
@@ -189,6 +217,7 @@ function App() {
                 <button
                   type="button"
                   className="btn btn-outline-success btn-sm float-right"
+                  onClick={() => handleCompletedItemImportant(item)}
                 >
                   <i className="fa fa-exclamation" />
                 </button>
